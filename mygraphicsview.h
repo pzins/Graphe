@@ -22,7 +22,7 @@ public:
     MyGraphicsView(QGraphicsScene*& scene, QWidget * parent = 0);
     ~MyGraphicsView();
 
-    Graphe* getGraphe(){return graphe_;}
+    Graphe* getGraphe() const {return graphe_;}
 
 };
 

@@ -19,11 +19,11 @@ public:
 
     void draw(QGraphicsScene* scene);
 
-    Sommet* getOrigin(){return origin_;}
-    Sommet* getDest(){return dest_;}
-    float getWidth(){return width_;}
-    float getCost(){return cost_;}
-    QColor getColor(){return color_;}
+    Sommet* getOrigin() const {return origin_;}
+    Sommet* getDest() const {return dest_;}
+    float getWidth() const {return width_;}
+    float getCost() const {return cost_;}
+    QColor getColor() const {return color_;}
 
     void setOrigin(Sommet* s){origin_ = s;}
     void setDest(Sommet* s){dest_ = s;}

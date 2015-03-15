@@ -33,7 +33,8 @@ private:
     QComboBox* combo_color_arc_;
     QComboBox* combo_color_sommet_;
     QPushButton* bt_add_sommet_;
-    QPushButton* bt_add_arc;
+    QPushButton* bt_add_arc_;
+    QPushButton* bt_compute_;
     QLineEdit* edit_radius_;
     QLineEdit* edit_cost_;
 
@@ -46,7 +47,7 @@ private slots:
     void handleAddSommet();
     void handleAddArc();
     void updateComboArc();
-
+    void compute();
 
 public:
     explicit MainWindow(QWidget *parent = 0);

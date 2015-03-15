@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     combo_color_sommet_ = new QComboBox(sommet_widget_);
     edit_radius_ = new QLineEdit(sommet_widget_);
 
-    bt_add_arc = new QPushButton("Add Arc", arc_widget_);
+    bt_add_arc_ = new QPushButton("Add Arc", arc_widget_);
     combo_origin_ = new QComboBox(arc_widget_);
     combo_dest_ = new QComboBox(arc_widget_);
     combo_color_arc_ = new QComboBox(arc_widget_);
@@ -60,6 +60,11 @@ MainWindow::MainWindow(QWidget *parent) :
     computeColorCombo(combo_color_arc_);
 
 
+    //TEST
+    bt_compute_ = new QPushButton("Compute", this);
+    v_opt_layout_->addWidget(bt_compute_);
+
+
     h_main_layout_->addWidget(view_);
     h_main_layout_->addWidget(opt_widget_);
     v_opt_layout_->addWidget(sommet_widget_);
@@ -69,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
     v_sommet_layout_->addWidget(edit_radius_);
     v_sommet_layout_->addWidget(combo_color_sommet_);
 
-    v_arc_layout_->addWidget(bt_add_arc);
+    v_arc_layout_->addWidget(bt_add_arc_);
     updateComboArc();
     v_arc_layout_->addWidget(edit_cost_);
     v_arc_layout_->addWidget(combo_color_arc_);
@@ -83,7 +88,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(bt_add_sommet_, SIGNAL(clicked()), this, SLOT(handleAddSommet()));
     connect(bt_add_sommet_, SIGNAL(clicked()), this, SLOT(updateComboArc()));
-    connect(bt_add_arc, SIGNAL(clicked()), this, SLOT(handleAddArc()));
+    connect(bt_add_arc_, SIGNAL(clicked()), this, SLOT(handleAddArc()));
+    connect(bt_compute_, SIGNAL(clicked()), this, SLOT(compute()));
 
 }
 
@@ -143,6 +149,83 @@ void MainWindow::updateComboArc()
     v_arc_layout_->addWidget(combo_origin_);
     v_arc_layout_->addWidget(combo_dest_);
 }
+
+
+
+void MainWindow::compute()
+{
+
+    std::vector<Sommet*> tmp = view_->getGraphe()->getVectSommet();
+    QVector<int> sommet;
+    for(int i = 0; i < tmp.size(); ++i) sommet.push_back(tmp.at(i)->getId());
+    int it = 0;
+    int col_it = 0;
+    while(it < sommet.size())
+    {
+        if(sommet.at(it) == -1)
+        {
+            ++it;
+            std::cout << "it = " << it << std::endl;
+            continue;
+        }
+        QVector<int>* pt = view_->getGraphe()->getSuccDirect(tmp.at(it));
+        QVector<int>* qt = view_->getGraphe()->getPredDirect(tmp.at(it));
+        for(int i = 0; i < pt->size(); ++i)
+        {
+            QVector<int>* pt2 = view_->getGraphe()->getSuccDirect(tmp.at(pt->at(i)));
+            for(int j = 0; j < pt2->size(); ++j)
+            {
+                if(!pt->contains(pt2->at(j))) pt->push_back(pt2->at(j));
+            }
+        }
+        for(int i = 0; i < qt->size(); ++i)
+        {
+            QVector<int>* pt2 = view_->getGraphe()->getPredDirect(tmp.at(qt->at(i)));
+            for(int j = 0; j < pt2->size(); ++j)
+            {
+                if(!qt->contains(pt2->at(j))) qt->push_back(pt2->at(j));
+            }
+        }
+        QVector<int> connexe;
+        for(int i = 0; i < view_->getGraphe()->getMatrAsso().size(); ++i)
+        {
+            if(pt->contains(i) && qt->contains(i))
+            {
+                connexe.push_back(i);
+                sommet.replace(i, -1);
+            }
+        }
+        if(connexe.size() > 0) ++col_it;
+        if (col_it > 4) col_it = 0;
+        /*
+        std::cout << "******************" << std::endl;
+        for(int i = 0; i < connexe.size(); ++i) std::cout << connexe.at(i) << std::endl;
+        std::cout << "------------------"<< std::endl;
+        */
+        QColor col[] = {Qt::red, Qt::blue, Qt::green, Qt::yellow, Qt::gray};
+        for(int i = 0; i < tmp.size(); ++i)
+        {
+            if(connexe.contains(view_->getGraphe()->getVectSommet().at(i)->getId()))
+                view_->getGraphe()->getVectSommet().at(i)->setColor(col[col_it]);
+        }
+        ++it;
+
+    }
+
+
+
+    scene_->clear();
+    view_->getGraphe()->compute(scene_);
+}
+
+
+
+
+
+
+
+
+
 
 void computeColorCombo(QComboBox* combo)
 {
